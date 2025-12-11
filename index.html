@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perkakas Cuan Hunter</title>
+  <meta name="theme-color" content="#22c55e" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Perkakas Cuan Hunter</h1>
+    <p class="subtitle">Alat bantu sederhana untuk kegiatan cari cuan</p>
+  </header>
+
+  <nav class="app-nav">
+    <button class="nav-button active" data-target="fraksi-page">Fraksi Harga</button>
+    <button class="nav-button" data-target="trailing-page">Trailing Stop</button>
+    <button class="nav-button" data-target="ara-arb-page">ARA / ARB</button>
+    <button class="nav-button" data-target="gain-page">Kenaikan Harga</button>
+    <button class="nav-button" data-target="ff-page">Finansial Freedom</button>
+    <button class="nav-button" data-target="lainnya-page">Lainnya</button>
+  </nav>
+
+  <main class="app-main">
+    <section id="fraksi-page" class="page active">
+      <div class="card">
+        <h2>Fraksi Harga & Tick</h2>
+        <p>Masukkan harga untuk melihat fraksi (tick) dan persentase per tick.</p>
+        <div class="form-grid">
+          <label>
+            Harga (Rp)
+            <input type="number" id="fraksi-price" min="1" inputmode="decimal" placeholder="contoh: 300" />
+          </label>
+          <button id="fraksi-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="fraksi-result" class="result"></div>
+      </div>
+
+      <div class="card">
+        <h3>Tabel Fraksi Harga</h3>
+        <p class="helper-text">Berikut contoh fraksi harga berdasarkan rentang harga dan tick.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Rentang Harga (Rp)</th>
+                <th>Tick (Rp)</th>
+                <th>Perubahan per Tick</th>
+              </tr>
+            </thead>
+            <tbody id="fraksi-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="ff-page" class="page">
+      <div class="card">
+        <h2>Finansial Freedom - Dividen</h2>
+        <p>Simulasikan berapa pasif income dari dividen per tahun, per bulan, dan per hari berdasarkan modal, target dividend yield, dan asumsi pajak di Indonesia.</p>
+        <div class="form-grid">
+          <label>
+            Modal portofolio (Rp)
+            <input type="number" id="ff-modal" min="1" inputmode="decimal" placeholder="contoh: 1.000.000.000" />
+          </label>
+          <label>
+            Target dividend yield per tahun (%)
+            <input type="number" id="ff-yield" min="0" step="0.1" inputmode="decimal" placeholder="contoh: 4" />
+          </label>
+          <label>
+            Pajak dividen (%)
+            <input type="number" id="ff-tax" min="0" max="100" step="0.1" inputmode="decimal" placeholder="contoh: 10" />
+          </label>
+          <button id="ff-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="ff-result" class="result"></div>
+        <div class="table-wrapper" style="margin-top: 0.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Periode</th>
+                <th>Dividen bruto</th>
+                <th>Pajak</th>
+                <th>Dividen bersih</th>
+              </tr>
+            </thead>
+            <tbody id="ff-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="trailing-page" class="page">
+      <div class="card">
+        <h2>Kalkulator Trailing Stop</h2>
+        <p>Hitung persentase trailing stop berdasarkan jumlah tick dari harga saat ini.</p>
+        <div class="form-grid">
+          <label>
+            Harga saat ini (Rp)
+            <input type="number" id="ts-price" min="1" inputmode="decimal" placeholder="contoh: 300" />
+          </label>
+          <label>
+            Jumlah tick turun
+            <input type="number" id="ts-ticks" min="1" inputmode="decimal" placeholder="contoh: 3" />
+          </label>
+          <button id="ts-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="ts-result" class="result"></div>
+        <div class="table-wrapper" style="margin-top: 0.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Posisi</th>
+                <th>Harga (Rp)</th>
+                <th>Perubahan dari harga awal</th>
+              </tr>
+            </thead>
+            <tbody id="ts-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="ara-arb-page" class="page">
+      <div class="card">
+        <h2>Kalkulator ARA / ARB</h2>
+        <p>Masukkan harga acuan saham. Sistem akan menghitung level ARA/ARB otomatis berdasarkan tabel Auto Rejection IDX untuk saham (Papan Utama / Ekonomi Baru / Pengembangan).</p>
+        <div class="form-grid">
+          <label>
+            Harga acuan (Rp)
+            <input type="number" id="ara-price" min="1" inputmode="decimal" placeholder="contoh: 1.000" />
+          </label>
+          <button id="ara-arb-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="ara-arb-result" class="result"></div>
+        <div class="table-wrapper" style="margin-top: 0.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Keterangan</th>
+                <th>Nilai</th>
+              </tr>
+            </thead>
+            <tbody id="ara-arb-result-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Daftar Aturan ARA / ARB Saham</h3>
+        <p class="helper-text">Ringkasan batas Auto Rejection untuk saham Papan Utama, Ekonomi Baru, dan Pengembangan berdasarkan ketentuan IDX.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Rentang Harga (Rp)</th>
+                <th>AR Atas</th>
+                <th>AR Bawah</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>50 &ndash; 200</td>
+                <td>35%</td>
+                <td>15%</td>
+              </tr>
+              <tr>
+                <td>&gt; 200 &ndash; 5.000</td>
+                <td>25%</td>
+                <td>15%</td>
+              </tr>
+              <tr>
+                <td>&gt; 5.000</td>
+                <td>20%</td>
+                <td>15%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="gain-page" class="page">
+      <div class="card">
+        <h2>Kalkulator Kenaikan Harga</h2>
+        <p>Masukkan harga open dan harga sekarang/target untuk melihat kenaikan/penurunan dalam tick dan persentase, dengan batas ARA/ARB dari harga open.</p>
+        <div class="form-grid">
+          <label>
+            Harga open (Rp)
+            <input type="number" id="gain-open" min="1" inputmode="decimal" placeholder="contoh: 1.000" />
+          </label>
+          <label>
+            Harga sekarang / target (Rp)
+            <input type="number" id="gain-target" min="1" inputmode="decimal" placeholder="contoh: 1.200" />
+          </label>
+          <button id="gain-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="gain-result" class="result"></div>
+        <div class="table-wrapper" style="margin-top: 0.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Harga target (Rp)</th>
+                <th>Naik/Turun entry (tick - %)</th>
+                <th>Naik/Turun open (tick - %)</th>
+              </tr>
+            </thead>
+            <tbody id="gain-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="lainnya-page" class="page">
+      <div class="card">
+        <h2>Perkakas Lain (Menyusul)</h2>
+        <p>Kamu bisa menambahkan ide lain, misalnya:</p>
+        <ul class="feature-list">
+          <li>Position sizing / risk management.</li>
+          <li>Jurnal trading / investasi sederhana.</li>
+          <li>Simulasi target harga dan risk-reward.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Perkakas pribadi. Selalu verifikasi kembali dengan data resmi broker/BEI.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
