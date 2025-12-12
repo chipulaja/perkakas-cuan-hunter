@@ -839,12 +839,282 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  function initCompounding() {
+    var modalInput = document.getElementById("cmp-modal");
+    var dailyInput = document.getElementById("cmp-daily");
+    var daysInput = document.getElementById("cmp-days");
+    var monthsInput = document.getElementById("cmp-months");
+    var modeSelect = document.getElementById("cmp-mode");
+    var takeProfitAmountInput = document.getElementById("cmp-tp-amount");
+    var takeProfitPeriodSelect = document.getElementById("cmp-tp-period");
+    var button = document.getElementById("cmp-calc-btn");
+    var monthBody = document.getElementById("cmp-month-table-body");
+    var dayBody = document.getElementById("cmp-day-table-body");
+
+    function clearTables() {
+      if (monthBody) {
+        monthBody.innerHTML = "";
+      }
+      if (dayBody) {
+        dayBody.innerHTML = "";
+      }
+    }
+
+    function calculate() {
+      if (!modalInput || !dailyInput || !daysInput || !monthsInput || !modeSelect || !takeProfitAmountInput || !takeProfitPeriodSelect) {
+        return;
+      }
+
+      var modal = parseFloat(modalInput.value.replace(",", "."));
+      var dailyPercent = parseFloat(dailyInput.value.replace(",", "."));
+      var daysPerMonth = parseInt(daysInput.value, 10);
+      var months = parseInt(monthsInput.value, 10);
+      var mode = modeSelect.value;
+
+      var takeProfitAmount = parseFloat(takeProfitAmountInput.value.replace(",", "."));
+      if (isNaN(takeProfitAmount)) {
+        takeProfitAmount = 0;
+      }
+      var takeProfitPeriod = takeProfitPeriodSelect.value;
+
+      if (isNaN(modal) || modal <= 0) {
+        clearTables();
+        setResult("cmp-result", "Mohon masukkan modal awal yang valid.", true);
+        return;
+      }
+
+      if (isNaN(dailyPercent) || dailyPercent < 0) {
+        clearTables();
+        setResult("cmp-result", "Mohon masukkan target cuan harian yang valid.", true);
+        return;
+      }
+
+      if (isNaN(daysPerMonth) || daysPerMonth <= 0 || daysPerMonth > 31) {
+        clearTables();
+        setResult("cmp-result", "Mohon masukkan jumlah hari bursa per bulan yang valid (1-31).", true);
+        return;
+      }
+
+      if (isNaN(months) || months <= 0 || months > 60) {
+        clearTables();
+        setResult("cmp-result", "Mohon masukkan durasi bulan yang valid (1-60).", true);
+        return;
+      }
+
+      if (mode !== "reinvest" && mode !== "withdraw") {
+        clearTables();
+        setResult("cmp-result", "Mohon pilih mode profit harian yang valid.", true);
+        return;
+      }
+
+      if (!isFinite(takeProfitAmount) || takeProfitAmount < 0) {
+        clearTables();
+        setResult("cmp-result", "Mohon masukkan take profit (Rp) yang valid.", true);
+        return;
+      }
+
+      if (takeProfitPeriod !== "daily" && takeProfitPeriod !== "monthly") {
+        clearTables();
+        setResult("cmp-result", "Mohon pilih periode take profit yang valid.", true);
+        return;
+      }
+
+      var dailyRate = dailyPercent / 100;
+      var initialModal = modal;
+      var capital = modal;
+      var profitCumulative = 0;
+      var profitTakenCumulative = 0;
+      var totalDays = daysPerMonth * months;
+
+      clearTables();
+
+      var monthFragment = document.createDocumentFragment();
+      var dayFragment = document.createDocumentFragment();
+
+      for (var monthIndex = 1; monthIndex <= months; monthIndex++) {
+        var monthStartCapital = capital;
+        var monthStartProfit = profitCumulative;
+        var monthStartTaken = profitTakenCumulative;
+
+        for (var dayIndex = 1; dayIndex <= daysPerMonth; dayIndex++) {
+          var dayStartCapital = capital;
+          var profitDay = dayStartCapital * dailyRate;
+          var takenToday = 0;
+
+          if (mode === "withdraw") {
+            takenToday = profitDay;
+            profitCumulative += profitDay;
+            profitTakenCumulative += takenToday;
+          } else {
+            if (takeProfitAmount > 0 && takeProfitPeriod === "daily") {
+              takenToday = Math.min(takeProfitAmount, profitDay);
+            }
+
+            var reinvestProfit = profitDay - takenToday;
+            if (reinvestProfit < 0) {
+              reinvestProfit = 0;
+            }
+            capital = dayStartCapital + reinvestProfit;
+
+            profitCumulative += profitDay;
+            profitTakenCumulative += takenToday;
+
+            if (takeProfitAmount > 0 && takeProfitPeriod === "monthly" && dayIndex === daysPerMonth) {
+              var profitMonthGrossSoFar = profitCumulative - monthStartProfit;
+              var takenThisMonth = Math.min(takeProfitAmount, profitMonthGrossSoFar);
+              capital = capital - takenThisMonth;
+              profitTakenCumulative += takenThisMonth;
+              takenToday += takenThisMonth;
+            }
+          }
+
+          var totalAsset = initialModal + profitCumulative;
+
+          if (dayBody) {
+            var dayTr = document.createElement("tr");
+
+            var dayLabelCell = document.createElement("td");
+            var dayStartCell = document.createElement("td");
+            var dayProfitCell = document.createElement("td");
+            var dayTakenCell = document.createElement("td");
+            var dayEndCell = document.createElement("td");
+            var dayCumCell = document.createElement("td");
+            var dayAssetCell = document.createElement("td");
+
+            dayLabelCell.textContent = "B" + monthIndex + " H" + dayIndex;
+            dayStartCell.textContent = formatCurrency(dayStartCapital);
+            dayProfitCell.textContent = formatCurrency(profitDay);
+            dayTakenCell.textContent = formatCurrency(takenToday);
+            dayEndCell.textContent = formatCurrency(capital);
+            dayCumCell.textContent = formatCurrency(profitCumulative);
+            dayAssetCell.textContent = formatCurrency(totalAsset);
+
+            dayTr.appendChild(dayLabelCell);
+            dayTr.appendChild(dayStartCell);
+            dayTr.appendChild(dayProfitCell);
+            dayTr.appendChild(dayTakenCell);
+            dayTr.appendChild(dayEndCell);
+            dayTr.appendChild(dayCumCell);
+            dayTr.appendChild(dayAssetCell);
+
+            dayFragment.appendChild(dayTr);
+          }
+        }
+
+        var monthEndCapital = capital;
+        var profitMonth = profitCumulative - monthStartProfit;
+        var takenMonth = profitTakenCumulative - monthStartTaken;
+        var monthTotalAsset = initialModal + profitCumulative;
+        var growthTotal = (monthTotalAsset / initialModal - 1) * 100;
+
+        if (monthBody) {
+          var monthTr = document.createElement("tr");
+
+          var monthCell = document.createElement("td");
+          var monthStartCell = document.createElement("td");
+          var monthProfitCell = document.createElement("td");
+          var monthTakenCell = document.createElement("td");
+          var monthCumCell = document.createElement("td");
+          var monthTakenCumCell = document.createElement("td");
+          var monthEndCell = document.createElement("td");
+          var monthAssetCell = document.createElement("td");
+          var monthGrowthCell = document.createElement("td");
+
+          monthCell.textContent = "Bulan " + monthIndex;
+          monthStartCell.textContent = formatCurrency(monthStartCapital);
+          monthProfitCell.textContent = formatCurrency(profitMonth);
+          monthTakenCell.textContent = formatCurrency(takenMonth);
+          monthCumCell.textContent = formatCurrency(profitCumulative);
+          monthTakenCumCell.textContent = formatCurrency(profitTakenCumulative);
+          monthEndCell.textContent = formatCurrency(monthEndCapital);
+          monthAssetCell.textContent = formatCurrency(monthTotalAsset);
+          monthGrowthCell.textContent = formatPercent(growthTotal);
+
+          monthTr.appendChild(monthCell);
+          monthTr.appendChild(monthStartCell);
+          monthTr.appendChild(monthProfitCell);
+          monthTr.appendChild(monthTakenCell);
+          monthTr.appendChild(monthCumCell);
+          monthTr.appendChild(monthTakenCumCell);
+          monthTr.appendChild(monthEndCell);
+          monthTr.appendChild(monthAssetCell);
+          monthTr.appendChild(monthGrowthCell);
+
+          monthFragment.appendChild(monthTr);
+        }
+      }
+
+      if (monthBody) {
+        monthBody.appendChild(monthFragment);
+      }
+      if (dayBody) {
+        dayBody.appendChild(dayFragment);
+      }
+
+      var finalTotalAsset = initialModal + profitCumulative;
+      var finalGrowth = (finalTotalAsset / initialModal - 1) * 100;
+
+      var avgProfitDay = profitCumulative / totalDays;
+      var avgProfitMonth = profitCumulative / months;
+      var profitNotTaken = profitCumulative - profitTakenCumulative;
+
+      var takeProfitText;
+      if (mode === "withdraw") {
+        takeProfitText = "Semua profit (mode modal tetap)";
+      } else if (takeProfitAmount > 0) {
+        takeProfitText = formatCurrency(takeProfitAmount) + " / " + (takeProfitPeriod === "daily" ? "hari" : "bulan");
+      } else {
+        takeProfitText = "-";
+      }
+
+      var lines = [];
+      lines.push("Modal awal: " + formatCurrency(initialModal));
+      lines.push("Target cuan harian: " + formatPercent(dailyPercent));
+      lines.push("Hari bursa per bulan: " + daysPerMonth);
+      lines.push("Durasi: " + months + " bulan (" + totalDays + " hari bursa)");
+      lines.push("Mode: " + (mode === "reinvest" ? "Reinvest (compounding)" : "Ambil profit (modal tetap)"));
+      lines.push("Take profit: " + takeProfitText);
+      lines.push("Total profit: " + formatCurrency(profitCumulative));
+      lines.push("Total profit diambil: " + formatCurrency(profitTakenCumulative));
+      lines.push("Profit belum diambil: " + formatCurrency(profitNotTaken));
+      lines.push("Modal akhir: " + formatCurrency(capital));
+      lines.push("Total aset akhir: " + formatCurrency(finalTotalAsset));
+      lines.push("Growth total: " + formatPercent(finalGrowth));
+      lines.push("Rata-rata profit per hari: " + formatCurrency(avgProfitDay));
+      lines.push("Rata-rata profit per bulan: " + formatCurrency(avgProfitMonth));
+      lines.push("");
+      lines.push("Catatan:");
+      lines.push("- Simulasi ini tidak memperhitungkan fee broker, pajak, slippage, atau loss.");
+      lines.push("- Hari bursa diasumsikan selalu tercapai sesuai input.");
+      setResult("cmp-result", lines.join("\n"), false);
+    }
+
+    if (button) {
+      button.addEventListener("click", function () {
+        calculate();
+      });
+    }
+
+    [modalInput, dailyInput, daysInput, monthsInput, takeProfitAmountInput].forEach(function (input) {
+      if (!input) {
+        return;
+      }
+      input.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+          calculate();
+        }
+      });
+    });
+
+  }
+
   buildFraksiTable();
   initFraksiCalculator();
   initTrailingStop();
   initAraArb();
   initGainCalculator();
   initFinansialFreedom();
+  initCompounding();
 });
 
 if ("serviceWorker" in navigator) {

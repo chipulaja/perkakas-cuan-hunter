@@ -20,6 +20,7 @@
     <button class="nav-button" data-target="ara-arb-page">ARA / ARB</button>
     <button class="nav-button" data-target="gain-page">Kenaikan Harga</button>
     <button class="nav-button" data-target="ff-page">Finansial Freedom</button>
+    <button class="nav-button" data-target="compounding-page">Simulasi Compounding</button>
     <button class="nav-button" data-target="lainnya-page">Lainnya</button>
   </nav>
 
@@ -208,6 +209,90 @@
               </tr>
             </thead>
             <tbody id="gain-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="compounding-page" class="page">
+      <div class="card">
+        <h2>Simulasi Compounding</h2>
+        <p>Simulasi target cuan harian dengan asumsi jumlah hari bursa per bulan. Kamu bisa pilih profit harian direinvest (compounding) atau diambil (modal tetap).</p>
+        <div class="form-grid">
+          <label>
+            Modal awal (Rp)
+            <input type="number" id="cmp-modal" min="1" inputmode="decimal" placeholder="contoh: 10.000.000" />
+          </label>
+          <label>
+            Target cuan harian (%)
+            <input type="number" id="cmp-daily" min="0" step="0.01" inputmode="decimal" placeholder="contoh: 1" />
+          </label>
+          <label>
+            Hari bursa per bulan
+            <input type="number" id="cmp-days" min="1" max="31" inputmode="decimal" value="20" />
+          </label>
+          <label>
+            Durasi (bulan)
+            <input type="number" id="cmp-months" min="1" max="60" inputmode="decimal" value="1" />
+          </label>
+          <label>
+            Profit harian
+            <select id="cmp-mode">
+              <option value="reinvest">Reinvest (profit jadi modal)</option>
+              <option value="withdraw">Ambil profit (modal tetap)</option>
+            </select>
+          </label>
+          <label>
+            Take profit (Rp)
+            <input type="number" id="cmp-tp-amount" min="0" inputmode="decimal" placeholder="contoh: 50.000" />
+          </label>
+          <label>
+            Periode take profit
+            <select id="cmp-tp-period">
+              <option value="daily">Harian</option>
+              <option value="monthly">Bulanan</option>
+            </select>
+          </label>
+          <button id="cmp-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+        <div id="cmp-result" class="result"></div>
+        <div class="table-wrapper" style="margin-top: 0.9rem;">
+          <table>
+            <thead>
+              <tr>
+                <th>Bulan</th>
+                <th>Modal awal</th>
+                <th>Profit bulan</th>
+                <th>Profit diambil bulan</th>
+                <th>Profit kumulatif</th>
+                <th>Profit diambil kumulatif</th>
+                <th>Modal akhir</th>
+                <th>Total aset</th>
+                <th>Growth total</th>
+              </tr>
+            </thead>
+            <tbody id="cmp-month-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Detail Harian</h3>
+        <p class="helper-text">Detail per hari bursa sesuai target cuan harian. Baris bisa panjang jika durasi bulan besar.</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Hari</th>
+                <th>Modal awal</th>
+                <th>Profit hari</th>
+                <th>Profit diambil</th>
+                <th>Modal akhir</th>
+                <th>Profit kumulatif</th>
+                <th>Total aset</th>
+              </tr>
+            </thead>
+            <tbody id="cmp-day-table-body"></tbody>
           </table>
         </div>
       </div>
