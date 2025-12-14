@@ -2,6 +2,23 @@ document.addEventListener("DOMContentLoaded", function () {
   var pages = document.querySelectorAll(".page");
   var navButtons = document.querySelectorAll(".nav-button");
 
+  var ACTIVE_PAGE_STORAGE_KEY = "cuan-hunter.activePage";
+  var COMPOUNDING_STORAGE_KEY = "cuan-hunter.compounding";
+
+  function readStorage(key) {
+    try {
+      return window.localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function writeStorage(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+    } catch (e) {}
+  }
+
   function showPage(pageId) {
     pages.forEach(function (page) {
       if (page.id === pageId) {
@@ -10,15 +27,29 @@ document.addEventListener("DOMContentLoaded", function () {
         page.classList.remove("active");
       }
     });
+
+    navButtons.forEach(function (button) {
+      if (button.getAttribute("data-target") === pageId) {
+        button.classList.add("active");
+      } else {
+        button.classList.remove("active");
+      }
+    });
+
+    writeStorage(ACTIVE_PAGE_STORAGE_KEY, pageId);
+  }
+
+  var savedPage = readStorage(ACTIVE_PAGE_STORAGE_KEY);
+  if (savedPage) {
+    var savedPageEl = document.getElementById(savedPage);
+    if (savedPageEl && savedPageEl.classList.contains("page")) {
+      showPage(savedPage);
+    }
   }
 
   navButtons.forEach(function (button) {
     button.addEventListener("click", function () {
       var target = button.getAttribute("data-target");
-      navButtons.forEach(function (b) {
-        b.classList.remove("active");
-      });
-      button.classList.add("active");
       showPage(target);
     });
   });
@@ -851,6 +882,8 @@ document.addEventListener("DOMContentLoaded", function () {
     var monthBody = document.getElementById("cmp-month-table-body");
     var dayBody = document.getElementById("cmp-day-table-body");
 
+    var hasCalculated = false;
+
     function clearTables() {
       if (monthBody) {
         monthBody.innerHTML = "";
@@ -858,6 +891,63 @@ document.addEventListener("DOMContentLoaded", function () {
       if (dayBody) {
         dayBody.innerHTML = "";
       }
+    }
+
+    function saveState(hasCalculated) {
+      var state = {
+        modal: modalInput ? modalInput.value : "",
+        daily: dailyInput ? dailyInput.value : "",
+        days: daysInput ? daysInput.value : "",
+        months: monthsInput ? monthsInput.value : "",
+        mode: modeSelect ? modeSelect.value : "",
+        takeProfitAmount: takeProfitAmountInput ? takeProfitAmountInput.value : "",
+        takeProfitPeriod: takeProfitPeriodSelect ? takeProfitPeriodSelect.value : "",
+        hasCalculated: !!hasCalculated
+      };
+
+      writeStorage(COMPOUNDING_STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function restoreState() {
+      var raw = readStorage(COMPOUNDING_STORAGE_KEY);
+      if (!raw) {
+        return null;
+      }
+
+      var parsed;
+      try {
+        parsed = JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+
+      if (modalInput && parsed.modal != null) {
+        modalInput.value = parsed.modal;
+      }
+      if (dailyInput && parsed.daily != null) {
+        dailyInput.value = parsed.daily;
+      }
+      if (daysInput && parsed.days != null) {
+        daysInput.value = parsed.days;
+      }
+      if (monthsInput && parsed.months != null) {
+        monthsInput.value = parsed.months;
+      }
+      if (modeSelect && parsed.mode) {
+        modeSelect.value = parsed.mode;
+      }
+      if (takeProfitAmountInput && parsed.takeProfitAmount != null) {
+        takeProfitAmountInput.value = parsed.takeProfitAmount;
+      }
+      if (takeProfitPeriodSelect && parsed.takeProfitPeriod) {
+        takeProfitPeriodSelect.value = parsed.takeProfitPeriod;
+      }
+
+      return parsed;
     }
 
     function calculate() {
@@ -876,6 +966,9 @@ document.addEventListener("DOMContentLoaded", function () {
         takeProfitAmount = 0;
       }
       var takeProfitPeriod = takeProfitPeriodSelect.value;
+
+      hasCalculated = true;
+      saveState(true);
 
       if (isNaN(modal) || modal <= 0) {
         clearTables();
@@ -1099,12 +1192,36 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!input) {
         return;
       }
+      input.addEventListener("input", function () {
+        saveState(hasCalculated);
+      });
+    });
+
+    [modeSelect, takeProfitPeriodSelect].forEach(function (select) {
+      if (!select) {
+        return;
+      }
+      select.addEventListener("change", function () {
+        saveState(hasCalculated);
+      });
+    });
+
+    [modalInput, dailyInput, daysInput, monthsInput, takeProfitAmountInput].forEach(function (input) {
+      if (!input) {
+        return;
+      }
       input.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
           calculate();
         }
       });
     });
+
+    var restored = restoreState();
+    if (restored && restored.hasCalculated) {
+      hasCalculated = true;
+      calculate();
+    }
 
   }
 
