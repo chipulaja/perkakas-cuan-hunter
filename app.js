@@ -312,6 +312,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var sisaLotEl = document.getElementById("ptp-sisa-lot");
     var bapEl = document.getElementById("ptp-bap");
     var modalRemainEl = document.getElementById("ptp-modal-remaining");
+    var modalAtSellEl = document.getElementById("ptp-modal-at-sell");
 
     function updatePercentLabel(value) {
       if (percentValue) {
@@ -377,6 +378,8 @@ document.addEventListener("DOMContentLoaded", function () {
       var modalTersisaSetelahProfit = modalSisaLot - totalProfit;
       var hargaBap = lembarSisa > 0 ? modalTersisaSetelahProfit / lembarSisa : NaN;
 
+      var nilaiSisaPadaHargaJual = lembarSisa * sell;
+
       if (resultBox) {
         resultBox.classList.remove("empty");
       }
@@ -394,6 +397,9 @@ document.addEventListener("DOMContentLoaded", function () {
       }
       if (modalRemainEl) {
         modalRemainEl.textContent = formatCurrency(modalTersisaSetelahProfit);
+      }
+      if (modalAtSellEl) {
+        modalAtSellEl.textContent = formatCurrency(nilaiSisaPadaHargaJual);
       }
     }
 
