@@ -297,6 +297,124 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function initPartialTakeProfit() {
+    var buyInput = document.getElementById("ptp-buy");
+    var lotsInput = document.getElementById("ptp-lots");
+    var sellInput = document.getElementById("ptp-sell");
+    var percentRange = document.getElementById("ptp-percent-range");
+    var percentValue = document.getElementById("ptp-percent-value");
+    var button = document.getElementById("ptp-calc-btn");
+
+    var errorBox = document.getElementById("ptp-error");
+    var resultBox = document.getElementById("ptp-result");
+    var profitEl = document.getElementById("ptp-profit");
+    var diffEl = document.getElementById("ptp-diff");
+    var sisaLotEl = document.getElementById("ptp-sisa-lot");
+    var bapEl = document.getElementById("ptp-bap");
+    var modalRemainEl = document.getElementById("ptp-modal-remaining");
+
+    function updatePercentLabel(value) {
+      if (percentValue) {
+        percentValue.textContent = value + "%";
+      }
+    }
+
+    if (percentRange) {
+      updatePercentLabel(percentRange.value);
+      percentRange.addEventListener("input", function () {
+        updatePercentLabel(percentRange.value);
+      });
+    }
+
+    function clearResult() {
+      if (resultBox) {
+        resultBox.classList.add("empty");
+      }
+    }
+
+    function calculate() {
+      if (!buyInput || !lotsInput || !sellInput || !percentRange) {
+        return;
+      }
+
+      var buy = parseFloat(buyInput.value.replace(",", "."));
+      var lots = parseFloat(lotsInput.value.replace(",", "."));
+      var sell = parseFloat(sellInput.value.replace(",", "."));
+      var percent = parseFloat(percentRange.value);
+
+      clearResult();
+      setResult("ptp-error", "", false);
+
+      if (!isFinite(buy) || buy <= 0 || !isFinite(lots) || lots <= 0 || !isFinite(sell) || sell <= 0) {
+        setResult("ptp-error", "Mohon isi semua field dengan angka yang valid.", true);
+        return;
+      }
+
+      if (sell <= buy) {
+        setResult("ptp-error", "Harga jual harus lebih tinggi dari harga beli.", true);
+        return;
+      }
+
+      if (!isFinite(percent) || percent <= 0 || percent > 100) {
+        setResult("ptp-error", "Persentase jual harus 1-100%.", true);
+        return;
+      }
+
+      var LEMBAR_PER_LOT = 100;
+
+      var lotDijual = (lots * percent) / 100;
+      var sisaLot = lots - lotDijual;
+
+      var lembarDijual = lotDijual * LEMBAR_PER_LOT;
+      var lembarSisa = sisaLot * LEMBAR_PER_LOT;
+
+      var profitPerLembar = sell - buy;
+      var totalProfit = profitPerLembar * lembarDijual;
+
+      var diffPercent = ((sell - buy) / buy) * 100;
+
+      var modalSisaLot = buy * lembarSisa;
+      var modalTersisaSetelahProfit = modalSisaLot - totalProfit;
+      var hargaBap = lembarSisa > 0 ? modalTersisaSetelahProfit / lembarSisa : NaN;
+
+      if (resultBox) {
+        resultBox.classList.remove("empty");
+      }
+      if (profitEl) {
+        profitEl.textContent = formatCurrency(totalProfit);
+      }
+      if (diffEl) {
+        diffEl.textContent = formatPercent(diffPercent);
+      }
+      if (sisaLotEl) {
+        sisaLotEl.textContent = sisaLot.toFixed(2) + " lot";
+      }
+      if (bapEl) {
+        bapEl.textContent = isFinite(hargaBap) ? formatCurrency(hargaBap) : "-";
+      }
+      if (modalRemainEl) {
+        modalRemainEl.textContent = formatCurrency(modalTersisaSetelahProfit);
+      }
+    }
+
+    if (button) {
+      button.addEventListener("click", function () {
+        calculate();
+      });
+    }
+
+    [buyInput, lotsInput, sellInput].forEach(function (input) {
+      if (!input) {
+        return;
+      }
+      input.addEventListener("keyup", function (event) {
+        if (event.key === "Enter") {
+          calculate();
+        }
+      });
+    });
+  }
+
   function initTrailingStop() {
     var priceInput = document.getElementById("ts-price");
     var ticksInput = document.getElementById("ts-ticks");
@@ -1230,6 +1348,7 @@ document.addEventListener("DOMContentLoaded", function () {
   initTrailingStop();
   initAraArb();
   initGainCalculator();
+  initPartialTakeProfit();
   initFinansialFreedom();
   initCompounding();
 });

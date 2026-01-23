@@ -1,4 +1,4 @@
-const CACHE_NAME = "cuan-hunter-v4";
+const CACHE_NAME = "cuan-hunter-v6";
 const ASSETS = [
   "./",
   "./index.html",

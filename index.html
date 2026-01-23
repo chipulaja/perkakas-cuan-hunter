@@ -21,6 +21,7 @@
     <button class="nav-button" data-target="gain-page">Kenaikan Harga</button>
     <button class="nav-button" data-target="ff-page">Finansial Freedom</button>
     <button class="nav-button" data-target="compounding-page">Simulasi Compounding</button>
+    <button class="nav-button" data-target="partial-tp-page">Take Profit Sebagian</button>
     <button class="nav-button" data-target="lainnya-page">Lainnya</button>
   </nav>
 
@@ -53,6 +54,60 @@
             </thead>
             <tbody id="fraksi-table-body"></tbody>
           </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="partial-tp-page" class="page">
+      <div class="card">
+        <h2>Simulasi Take Profit Sebagian</h2>
+        <p>Hitung efek jual sebagian lot: profit diambil, sisa lot, modal tersisa, dan BAP (breakeven baru).</p>
+        <div class="form-grid">
+          <label>
+            Harga beli (Rp)
+            <input type="number" id="ptp-buy" min="1" inputmode="decimal" placeholder="contoh: 1.000" />
+          </label>
+          <label>
+            Jumlah lot
+            <input type="number" id="ptp-lots" min="0.01" step="0.01" inputmode="decimal" placeholder="contoh: 10" />
+          </label>
+          <label>
+            Harga jual (Rp)
+            <input type="number" id="ptp-sell" min="1" inputmode="decimal" placeholder="contoh: 1.200" />
+          </label>
+          <label>
+            Persen lot dijual
+            <div class="range-row">
+              <input type="range" id="ptp-percent-range" min="1" max="100" value="50" />
+              <span id="ptp-percent-value" class="range-value">50%</span>
+            </div>
+          </label>
+          <button id="ptp-calc-btn" class="primary-btn">Hitung</button>
+        </div>
+
+        <div id="ptp-error" class="result result-error empty"></div>
+
+        <div id="ptp-result" class="result empty">
+          <div class="stat-row">
+            <span>Profit diambil</span>
+            <strong id="ptp-profit">-</strong>
+          </div>
+          <div class="stat-row">
+            <span>Selisih harga jual vs beli</span>
+            <strong id="ptp-diff">-</strong>
+          </div>
+          <div class="stat-row">
+            <span>Sisa lot</span>
+            <strong id="ptp-sisa-lot">-</strong>
+          </div>
+          <div class="stat-row">
+            <span>BAP (breakeven baru)</span>
+            <strong id="ptp-bap">-</strong>
+          </div>
+          <div class="stat-row">
+            <span>Modal tersisa setelah profit</span>
+            <strong id="ptp-modal-remaining">-</strong>
+          </div>
         </div>
       </div>
     </section>
