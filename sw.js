@@ -1,4 +1,4 @@
-const CACHE_NAME = "cuan-hunter-v6.5";
+const CACHE_NAME = "cuan-hunter-v7";
 const ASSETS = [
   "./",
   "./index.html",
@@ -11,6 +11,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -25,6 +26,7 @@ self.addEventListener("activate", (event) => {
       )
     )
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", (event) => {
